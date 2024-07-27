@@ -1,8 +1,8 @@
 '''
-tmpClean.ps1 v1.0
-12/25/2023
+tmpClean.ps1 v1.1
+07/27/2024
 
-PowerShell script that removes temporary files from a given directory.
+PowerShell script that removes temporary files from a given directory and its subfolders.
 
 Author: Mister Riley
 GitHub: https://github.com/sorzkode
@@ -10,8 +10,8 @@ GitHub: https://github.com/sorzkode
 MIT License
 '''
 
-Write-Host "Welcome to the tmpClean script!"
-Write-Host "This script will remove temporary files from a given directory."
+Write-Host "tmpClean script"
+Write-Host "This script will remove temporary files from a given directory and its subfolders."
 Write-Host "Please follow the instructions below:"
 
 do {
@@ -24,24 +24,21 @@ do {
             throw "Invalid directory path: $dir"
         }
 
-        # Set the path to search for files
-        $path = Join-Path -Path $dir -ChildPath "*.tmp"
-
-        # Use the Get-ChildItem cmdlet to get all *.tmp files in the specified directory
-        $files = Get-ChildItem -Path $path -File
+        # Use the Get-ChildItem cmdlet to get all *.tmp files in the specified directory and its subfolders
+        $files = Get-ChildItem -Path $dir -Filter *.tmp -Recurse -File
 
         # Check if there are files
         if ($files.Count -eq 0) {
-            Write-Output "No *.tmp files found in $dir."
+            Write-Output "No *.tmp files found in $dir or its subfolders."
         }
         else {
             # Sort the files by creation time in ascending order
             $sortedFiles = $files | Sort-Object -Property CreationTime
 
             # Print the details of the files
-            Write-Output "*.tmp files in ${dir}:"
+            Write-Output "*.tmp files in ${dir} and its subfolders:"
             foreach ($file in $sortedFiles) {
-                Write-Output "Name: $($file.Name)"
+                Write-Output "Name: $($file.FullName)"
                 Write-Output "Size: $($file.Length) bytes"
                 Write-Output "Creation Time: $($file.CreationTime)"
                 Write-Output "Last Modified Time: $($file.LastWriteTime)"
@@ -49,7 +46,7 @@ do {
             }
 
             # Prompt the user to confirm the removal of files
-            $confirm = Read-Host "Do you want to remove all *.tmp files in ${dir}? (Y/N)"
+            $confirm = Read-Host "Do you want to remove all *.tmp files in ${dir} and its subfolders? (Y/N)"
 
             if ($confirm -eq "Y") {
                 # Remove the files
